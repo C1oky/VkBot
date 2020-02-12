@@ -20,19 +20,13 @@ public class Loader {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
-
+    public static void main(String[] args) throws Exception {
         while (true) {
             Thread.sleep(200);
+            Message message = vkCore.getMessage();
 
-            try {
-                Message message = vkCore.getMessage();
-                if (message != null) {
-                    //TODO
-                }
-            } catch (Exception exception) {
-                exception.printStackTrace();
-                System.exit(-1);
+            if (message != null) {
+                //TODO
             }
         }
     }
