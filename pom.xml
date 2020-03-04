@@ -74,5 +74,13 @@
             <version>1.7.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>net.kronos.rkon.core</groupId>
+            <artifactId>rcon-core</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/libs/rkon-core-1.1.2.jar</systemPath>
+        </dependency>
+
     </dependencies>
 </project>
