@@ -1,6 +1,6 @@
 package me.c1oky;
 
-public class Loader {
+public class VkBot {
 
     public static final long START_TIME = System.currentTimeMillis();
 

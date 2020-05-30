@@ -15,7 +15,7 @@ import net.kronos.rkon.core.Rcon;
 import java.io.FileInputStream;
 import java.util.*;
 
-import static me.c1oky.Loader.*;
+import static me.c1oky.VkBot.*;
 
 public class VkCore {
 

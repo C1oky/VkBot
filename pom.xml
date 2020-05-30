@@ -60,7 +60,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>me.c1oky.Loader</mainClass>
+                                    <mainClass>me.c1oky.VkBot</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
