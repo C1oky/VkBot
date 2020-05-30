@@ -10,17 +10,18 @@ import com.vk.api.sdk.objects.messages.ConversationWithMessage;
 import com.vk.api.sdk.objects.messages.Message;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.messages.MessagesGetLongPollHistoryQuery;
+import lombok.Getter;
 
 import java.util.*;
 
 public class VkCore {
 
-    private static VkCore instance;
+    @Getter private static VkCore instance;
 
-    private String dataPath;
+    @Getter private String dataPath;
 
-    private VkApiClient vkApiClient;
-    private GroupActor groupActor;
+    @Getter private VkApiClient vkApiClient;
+    @Getter private GroupActor groupActor;
     private int maxMsgId = -1;
     private int ts;
 
@@ -105,17 +106,5 @@ public class VkCore {
         }
 
         return null;
-    }
-
-    public static VkApiClient getVk() {
-        return instance.vkApiClient;
-    }
-
-    public static GroupActor getActor() {
-        return instance.groupActor;
-    }
-
-    public static VkCore getInstance() {
-        return instance;
     }
 }

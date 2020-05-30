@@ -22,6 +22,7 @@
             <version>1.0.6</version>
         </dependency>
 
+        <!-- Log4j -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -33,6 +34,14 @@
             <artifactId>log4j-core</artifactId>
             <version>${log4j2.version}</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- Annotations -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.4</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- RCON lib -->
