@@ -13,6 +13,6 @@ Build JAR file
 -------------
 - `git clone https://github.com/C1oky/VkBot`
 - `cd VkBot`
-- `./mvnw clean package`
+- `mvn clean package`
 
 #### I will be glad of any help!

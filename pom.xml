@@ -6,7 +6,7 @@
 
     <name>VkBot</name>
     <groupId>me.c1oky</groupId>
-    <artifactId>vkbot</artifactId>
+    <artifactId>VkBot</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>

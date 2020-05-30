@@ -10,79 +10,33 @@ import com.vk.api.sdk.objects.messages.ConversationWithMessage;
 import com.vk.api.sdk.objects.messages.Message;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.messages.MessagesGetLongPollHistoryQuery;
-import net.kronos.rkon.core.Rcon;
 
-import java.io.FileInputStream;
 import java.util.*;
-
-import static me.c1oky.VkBot.*;
 
 public class VkCore {
 
-    private final Properties properties = new Properties();
     private static VkCore instance;
-    private VkApiClient vk;
-    private GroupActor actor;
+
+    private String dataPath;
+
+    private VkApiClient vkApiClient;
+    private GroupActor groupActor;
     private int maxMsgId = -1;
     private int ts;
 
-    public VkCore() {
-        instance = this;
-
-        try {
-            properties.load(new FileInputStream("src/main/resources/config.properties"));
-
-            vk = new VkApiClient(HttpTransportClient.getInstance());
-            actor = new GroupActor(
-                    Integer.parseInt(properties.getProperty("id")),
-                    properties.getProperty("token")
-            );
-
-            ts = vk.messages().getLongPollServer(actor).execute().getTs();
-
-            long LOAD_TIME = System.currentTimeMillis();
-
-            getConversations().forEach(conversation -> {
-                try {
-                    int id = conversation.getConversation().getPeer().getId();
-                    if (id > 2000000000) {
-                        sendMessage(id, "&#128276; Бот запущен за " + (double) (LOAD_TIME - START_TIME) / 1000 + " сек.");
-                    }
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
-            });
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
+    public VkCore(String dataPath, GroupActor actor) {
+        VkCore.instance = this;
+        this.dataPath = dataPath;
+        this.groupActor = actor;
     }
 
-    public void start() {
-        Thread thread = new Thread(() -> {
-            while (true) {
-                try {
-                    Message message = getMessage();
-
-                    if (message != null) {
-                        if (message.getFromId() == 494366746) { //Cool system of rights :D
-                            if (message.getText().startsWith("/")) {
-                                Rcon rcon = new Rcon(properties.getProperty("ip"), Integer.parseInt(properties.getProperty("port")), properties.getProperty("rcon-password").getBytes());
-                                String exec = rcon.command(message.getText().substring(1));
-                                sendMessage(message.getPeerId(), exec);
-                            }
-                        }
-                    }
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
-            }
-        });
-
-        thread.start();
+    public void boot() {
+        this.vkApiClient = new VkApiClient(HttpTransportClient.getInstance());
+        //TODO: Initialising
     }
 
     public void sendMessage(Integer peerId, String text) throws ClientException, ApiException {
-        vk.messages().send(actor)
+        vkApiClient.messages().send(groupActor)
                 .randomId(new Random().nextInt(Integer.MAX_VALUE))
                 .peerId(peerId)
                 .message(text)
@@ -90,33 +44,35 @@ public class VkCore {
     }
 
     public UserXtrCounters getUser(Integer id) throws ClientException, ApiException {
-        return vk
+        return vkApiClient
                 .users()
-                .get(actor)
+                .get(groupActor)
                 .userIds(id.toString())
                 .execute()
                 .get(0);
     }
 
     public List<ConversationWithMessage> getConversations() throws ClientException, ApiException {
-        return vk
+        return vkApiClient
                 .messages()
-                .getConversations(actor)
+                .getConversations(groupActor)
                 .execute()
                 .getItems();
     }
 
     public List<ConversationMember> getAllConversationMembers(Message message) throws ClientException, ApiException {
-        return vk
+        return vkApiClient
                 .messages()
-                .getConversationMembers(actor, message.getPeerId())
+                .getConversationMembers(groupActor, message.getPeerId())
                 .execute()
                 .getItems();
     }
 
     public Message getMessage() throws ClientException, ApiException {
-        MessagesGetLongPollHistoryQuery eventsQuery = vk.messages()
-                .getLongPollHistory(actor)
+        this.ts = vkApiClient.messages().getLongPollServer(groupActor).execute().getTs();
+
+        MessagesGetLongPollHistoryQuery eventsQuery = vkApiClient.messages()
+                .getLongPollHistory(groupActor)
                 .ts(ts);
 
         if (maxMsgId > 0) {
@@ -130,8 +86,8 @@ public class VkCore {
 
         if (!messages.isEmpty()) {
             try {
-                ts = vk.messages()
-                        .getLongPollServer(actor)
+                ts = vkApiClient.messages()
+                        .getLongPollServer(groupActor)
                         .execute()
                         .getTs();
             } catch (Exception exception) {
@@ -152,11 +108,11 @@ public class VkCore {
     }
 
     public static VkApiClient getVk() {
-        return instance.vk;
+        return instance.vkApiClient;
     }
 
     public static GroupActor getActor() {
-        return instance.actor;
+        return instance.groupActor;
     }
 
     public static VkCore getInstance() {
