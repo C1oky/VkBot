@@ -1,4 +1,4 @@
-package me.kkdevs;
+package me.c1oky;
 
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
@@ -15,7 +15,7 @@ import net.kronos.rkon.core.Rcon;
 import java.io.FileInputStream;
 import java.util.*;
 
-import static me.kkdevs.Loader.*;
+import static me.c1oky.Loader.*;
 
 public class VkCore {
 
