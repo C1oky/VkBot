@@ -11,19 +11,33 @@ import com.vk.api.sdk.objects.messages.Message;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.messages.MessagesGetLongPollHistoryQuery;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
+import me.c1oky.console.Console;
 
 import java.util.*;
 
+import static me.c1oky.VkBot.*;
+
+@Log4j2
 public class VkCore {
 
-    @Getter private static VkCore instance;
+    @Getter
+    private static VkCore instance;
 
-    @Getter private String dataPath;
+    @Getter
+    private String dataPath;
 
-    @Getter private VkApiClient vkApiClient;
-    @Getter private GroupActor groupActor;
+    @Getter
+    private VkApiClient vkApiClient;
+    @Getter
+    private GroupActor groupActor;
     private int maxMsgId = -1;
     private int ts;
+
+    private Thread handlerThread;
+
+    private Console console;
+    private ConsoleThread consoleThread;
 
     public VkCore(String dataPath, GroupActor actor) {
         VkCore.instance = this;
@@ -33,7 +47,33 @@ public class VkCore {
 
     public void boot() {
         this.vkApiClient = new VkApiClient(HttpTransportClient.getInstance());
+        this.console = new Console();
+        this.consoleThread = new ConsoleThread();
+        this.initHandler();
+        this.start();
         //TODO: Initialising
+    }
+
+    private void start() {
+        this.consoleThread.start();
+        this.handlerThread.start();
+        log.info("VkBot started (" + ((System.currentTimeMillis() - START_TIME) / 1000) + " сек.)");
+    }
+
+    private void initHandler() {
+        handlerThread = new Thread(() -> {
+            try {
+                while (true) {
+                    Message message = getMessage();
+
+                    if (message != null) {
+                        log.info(message.toString());
+                    }
+                }
+            } catch (Exception exception) {
+                log.fatal("Handler error", exception);
+            }
+        }, "Handler Thread");
     }
 
     public void sendMessage(Integer peerId, String text) throws ClientException, ApiException {
@@ -106,5 +146,16 @@ public class VkCore {
         }
 
         return null;
+    }
+
+    private class ConsoleThread extends Thread {
+        @Override
+        public void run() {
+            try {
+                console.start();
+            } catch (Exception exception) {
+                log.fatal("Console crash", exception);
+            }
+        }
     }
 }

@@ -1,14 +1,21 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<Configuration status="info">
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+            <PatternLayout pattern="%cyan{%d{HH:mm:ss}} [%style{%highlight{%-5level}{STYLE=Logback}}] %msg %n"/>
         </Console>
+        <RollingRandomAccessFile name="File" fileName="logs/history.log" filePattern="logs/%d{yyyy-MM-dd}-%i.zip">
+            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <OnStartupTriggeringPolicy/>
+            </Policies>
+        </RollingRandomAccessFile>
     </Appenders>
-
     <Loggers>
-        <Root level="Error">
+        <Root level="INFO">
             <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
         </Root>
     </Loggers>
 </Configuration>
