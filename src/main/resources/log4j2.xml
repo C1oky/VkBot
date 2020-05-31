@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
+        <Console name="Console">
             <PatternLayout pattern="%cyan{%d{HH:mm:ss}} [%style{%highlight{%-5level}{STYLE=Logback}}] %msg %n"/>
         </Console>
         <RollingRandomAccessFile name="File" fileName="logs/history.log" filePattern="logs/%d{yyyy-MM-dd}-%i.zip">

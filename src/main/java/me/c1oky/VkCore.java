@@ -14,6 +14,8 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import me.c1oky.console.Console;
 
+import java.io.*;
+import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 import static me.c1oky.VkBot.*;
@@ -25,39 +27,61 @@ public class VkCore {
     private static VkCore instance;
 
     @Getter
-    private String dataPath;
+    private final String dataPath;
 
     @Getter
-    private VkApiClient vkApiClient;
+    private final VkApiClient vkApiClient;
     @Getter
     private GroupActor groupActor;
+    private String groupToken;
+    private int groupId;
     private int maxMsgId = -1;
     private int ts;
 
     private Thread handlerThread;
 
-    private Console console;
-    private ConsoleThread consoleThread;
+    private final Console console;
+    private final ConsoleThread consoleThread;
 
-    public VkCore(String dataPath, GroupActor actor) {
+    private Properties properties;
+
+    public VkCore(String dataPath) {
         VkCore.instance = this;
         this.dataPath = dataPath;
-        this.groupActor = actor;
+        this.console = new Console();
+        this.consoleThread = new ConsoleThread();
+        this.vkApiClient = new VkApiClient(HttpTransportClient.getInstance());
     }
 
     public void boot() {
-        this.vkApiClient = new VkApiClient(HttpTransportClient.getInstance());
-        this.console = new Console();
-        this.consoleThread = new ConsoleThread();
+        this.consoleThread.start();
+        this.properties = new Properties();
+
+        if (!new File(this.dataPath + "bot.properties").exists()) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Добро пожаловать в мастер настройки VkBot!");
+            this.properties.setProperty("groupId", this.getValues(scanner, "Введите айди группы (буквенный айди в настоящее время не поддерживается!): "));
+            this.properties.setProperty("ownerId", this.getValues(scanner, "Введите айди профиля владельца (буквенный айди в настоящее время не поддерживается!): "));
+            this.properties.setProperty("token", this.getValues(scanner, "Введите токен группы: "));
+            log.info("Настройка завершена!");
+        }
+
+        this.loadProperties();
+
+        this.groupToken = this.properties.getProperty("token", "accessToken");
+        this.groupId = Integer.parseInt(this.properties.getProperty("groupId", "0"));
+        this.groupActor = new GroupActor(this.groupId, this.groupToken);
+        log.info("Создан объект GroupActor для сообщества со следующим индентификатором: " + this.groupActor.getGroupId());
+
+        log.info("DataPath Directory: {}", this.dataPath);
+
         this.initHandler();
         this.start();
-        //TODO: Initialising
     }
 
     private void start() {
-        this.consoleThread.start();
         this.handlerThread.start();
-        log.info("VkBot started (" + ((System.currentTimeMillis() - START_TIME) / 1000) + " сек.)");
+        log.info("VkBot started (" + (Math.round(System.currentTimeMillis() - START_TIME) / 1000d) + " sec.)");
     }
 
     private void initHandler() {
@@ -67,7 +91,7 @@ public class VkCore {
                     Message message = getMessage();
 
                     if (message != null) {
-                        log.info(message.toString());
+                        //TODO: Обработка сообщений в боте
                     }
                 }
             } catch (Exception exception) {
@@ -146,6 +170,39 @@ public class VkCore {
         }
 
         return null;
+    }
+
+    private String getValues(Scanner scanner, String message) {
+        while (true) {
+            System.out.println(message);
+            String value = scanner.nextLine().trim();
+            if (!value.isEmpty()) {
+                return value;
+            }
+        }
+    }
+
+    private void loadProperties() {
+        log.info("Загрузка файла конфигурации...");
+        File propertiesFile = new File(this.dataPath, "bot.properties");
+
+        try (InputStream stream = new FileInputStream(propertiesFile)) {
+            this.properties.load(stream);
+        } catch (FileNotFoundException | NoSuchFileException e) {
+            this.saveProperties();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void saveProperties() {
+        File propertiesFile = new File(this.dataPath, "bot.properties");
+
+        try (OutputStream stream = new FileOutputStream(propertiesFile)) {
+            this.properties.store(stream, "");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private class ConsoleThread extends Thread {
