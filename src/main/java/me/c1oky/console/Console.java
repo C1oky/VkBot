@@ -1,5 +1,6 @@
 package me.c1oky.console;
 
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -7,20 +8,33 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
+import java.io.IOException;
+
 @Log4j2
 public class Console {
 
-    private Terminal terminal;
+    @Getter
+    private static Terminal terminal;
+
+    static {
+        try {
+            terminal = TerminalBuilder.terminal();
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+    }
+
     private LineReader reader;
 
-    public void start() throws Exception {
-        this.terminal = TerminalBuilder.terminal();
+    public Console() {
         this.setReader(this.buildReader(LineReaderBuilder.builder().terminal(terminal)));
+    }
 
+    public void start() {
         String line;
         while (true) {
             try {
-                line = this.reader.readLine("> ");
+                line = this.reader.readLine();
             } catch (EndOfFileException ignored) {
                 // Continue reading after EOT
                 continue;
@@ -44,7 +58,7 @@ public class Console {
         this.reader = newReader;
     }
 
-    private void processInput(String input) throws Exception {
+    private void processInput(String input) {
         String inputString = input.trim();
         if (!inputString.isEmpty()) {
             //TODO: Обработка введённых данных в консоли
