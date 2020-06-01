@@ -7,7 +7,7 @@
 Introduction
 -------------
 
-This project is a demonstration of the possibility of interaction with the official VK Java SDK
+This project is a demonstration of the possibility of interaction with the official [VK Java SDK](https://github.com/VKCOM/vk-java-sdk)
 
 Build JAR file
 -------------
