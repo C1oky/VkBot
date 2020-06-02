@@ -40,7 +40,7 @@ public class VkCore {
     private int maxMsgId = -1;
     private int ts;
 
-    private Thread handlerThread;
+    private final HandlerThread handlerThread;
 
     private final Console console;
     private final ConsoleThread consoleThread;
@@ -52,24 +52,12 @@ public class VkCore {
         this.dataPath = dataPath;
         this.console = new Console();
         this.consoleThread = new ConsoleThread();
+        this.handlerThread = new HandlerThread();
         this.vkApiClient = new VkApiClient(HttpTransportClient.getInstance());
     }
 
     public void boot() {
         Thread.currentThread().setName("Main Thread");
-
-        // Extract information from the manifest
-        String buildVersion = "dev/unsupported";
-        InputStream inputStream = VkBot.class.getClassLoader().getResourceAsStream("git.properties");
-        try {
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            if ((buildVersion = properties.getProperty("git.commit.id.abbrev")) == null) {
-                buildVersion = "dev/unsupported";
-            }
-        } catch (IOException e) {/**/}
-
-        VkBot.setGitHash(buildVersion);
 
         log.info("Starting VkBot git-{}", VkBot.getGitHash());
 
@@ -95,30 +83,12 @@ public class VkCore {
 
         log.info("DataPath Directory: {}", this.dataPath);
 
-        this.initHandler();
         this.start();
     }
 
     private void start() {
         this.handlerThread.start();
         log.info("VkBot started ({} sec.)", Math.round(System.currentTimeMillis() - START_TIME) / 1000d);
-    }
-
-    private void initHandler() {
-        handlerThread = new Thread(() -> {
-            try {
-                while (true) {
-                    Message message = getMessage();
-
-                    if (message != null) {
-                        //TODO: Обработка сообщений в боте
-                    }
-                }
-            } catch (Exception exception) {
-                log.fatal("Error processing requests!", exception);
-                System.exit(0);
-            }
-        }, "Handler Thread");
     }
 
     public void sendMessage(Integer peerId, String text) throws ClientException, ApiException {
@@ -227,7 +197,34 @@ public class VkCore {
         }
     }
 
+    private class HandlerThread extends Thread {
+
+        private HandlerThread() {
+            super("Handler Thread");
+        }
+
+        @Override
+        public synchronized void run() {
+            while (true) {
+                try {
+                    Message message = getMessage();
+
+                    if (message != null) {
+                        //TODO: Обработка сообщений в боте
+                    }
+                } catch (Exception exception) {
+                    log.error("Error processing requests!", exception);
+                }
+            }
+        }
+    }
+
     private class ConsoleThread extends Thread {
+
+        private ConsoleThread() {
+            super("Console Thread");
+        }
+
         @Override
         public synchronized void run() {
             console.start();
