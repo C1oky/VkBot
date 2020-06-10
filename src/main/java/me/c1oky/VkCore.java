@@ -43,7 +43,7 @@ public class VkCore {
     private final HandlerThread handlerThread;
 
     private final Console console;
-    private final ConsoleThread consoleThread;
+    //private final ConsoleThread consoleThread;
 
     private Properties properties;
 
@@ -51,7 +51,7 @@ public class VkCore {
         VkCore.instance = this;
         this.dataPath = dataPath;
         this.console = new Console();
-        this.consoleThread = new ConsoleThread();
+        //this.consoleThread = new ConsoleThread();
         this.handlerThread = new HandlerThread();
         this.vkApiClient = new VkApiClient(HttpTransportClient.getInstance());
     }
@@ -72,7 +72,7 @@ public class VkCore {
             log.info("Setup is complete!");
         }
 
-        this.consoleThread.start();
+        //this.consoleThread.start();
 
         this.loadProperties();
 

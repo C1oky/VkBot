@@ -44,7 +44,7 @@ public class Console {
                 break;
             }
 
-            this.processInput(line);
+            //this.processInput(line);
         }
 
         this.setReader(null);
@@ -58,12 +58,12 @@ public class Console {
         this.reader = newReader;
     }
 
-    private void processInput(String input) {
+    /*private void processInput(String input) {
         String inputString = input.trim();
         if (!inputString.isEmpty()) {
-            //TODO: Обработка введённых данных в консоли
+            // Обработка введённых данных в консоли
         }
-    }
+    }*/
 
     private LineReader buildReader(LineReaderBuilder builder) {
         builder.appName("VkBot");
